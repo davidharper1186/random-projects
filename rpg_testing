@@ -1,0 +1,327 @@
+import random
+
+class fighter_moves:
+    def __init__(self, name, power):
+        self.name = name
+        self.power = power
+
+class fighter:
+    def __init__(self, name, level, health, attack, defense, speed, moves, xp):
+        self.name = name
+        self.level = level
+        self.health = health
+        self.attack = attack
+        self.defense = defense
+        self.speed = speed
+        self.moves = moves
+        self.xp = xp
+        
+
+        self.maxhp = self.health
+        self.real_attack = self.attack
+        self.real_defense = self.defense
+        self.real_speed = self.speed
+
+        self.atk_counter = 0
+        self.def_counter = 0
+        self.spd_counter = 0
+
+        self.to_next_level = 25
+        self.xp_value = 25 
+
+    def add_moves(self):
+        if self.name == "Basic Hero":
+            if Kick not in self.moves:
+                if self.level >= 3:
+                    self.moves.append(Kick)
+                    print(f"{self.name} learned Kick!")
+            if Guard not in self.moves:
+                if self.level >= 5:
+                    self.moves.append(Guard)
+                    print(f"{self.name} learned Guard!")
+        if self.name == "Basic Badguy":
+            if Leer not in self.moves:
+                if self.level >= 2:
+                    self.moves.append(Leer)
+                    print(f"{self.name} learned Leer!")
+            if Punch not in self.moves:
+                if self.level >= 4:
+                    self.moves.append(Punch)
+                    print(f"{self.name} learned Punch!")
+
+    def level_up(self):
+        self.level += 1
+        self.maxhp += 2
+        self.real_attack += 2
+        self.real_defense += 2
+        self.real_speed += 2
+        print(f"\n{self.name} leveled up to level {self.level}!")
+        print(f"Attack: {self.real_attack}\nDefense: {self.real_defense}\nSpeed: {self.real_speed}")
+
+    def add_xp(self, amount_xp):
+        self.xp += amount_xp
+        while self.xp >= self.to_next_level:
+            self.level_up()
+            self.xp = self.xp - self.to_next_level
+            self.to_next_level = round(self.to_next_level * 1.5)
+            self.xp_value = round(self.xp_value * 1.5)
+
+
+    def heal(self, amount):
+        if (amount + self.health) > self.maxhp:
+            amount_gained = self.maxhp - self.health
+            self.health = self.maxhp
+            print(f"{self.name} gained {amount_gained}!")
+        else:
+            self.health += amount
+            print(f"{self.name} gained {amount} health points!")
+
+    def raise_attack(self):
+        if self.atk_counter < 3:
+            self.attack += 4
+            print(f"{self.name}'s attack has been raised!")
+            self.atk_counter += 1
+        else:
+            print(f"{self.name}'s attack won't go any higher!")
+    def raise_defense(self):
+        if self.def_counter < 3:
+            self.defense += 4
+            print(f"{self.name}'s defense has been raised!")
+            self.def_counter += 1
+        else:
+            print(f"{self.name}'s defense won't go any higher!")
+    def raise_speed(self):
+        if self.spd_counter < 3:
+            self.speed += 4
+            print(f"{self.name}'s speed has been raised!")
+            self.spd_counter += 1
+        else:
+            print(f"{self.name}'s speed won't go any higher!")
+    def lower_attack(self):
+        if self.atk_counter > -3:
+            self.attack -= 4
+            print(f"{self.name}'s attack has been lowered!")
+            self.atk_counter -= 1
+        else:
+            print(f"{self.name}'s attack won't go any lower!")
+    def lower_defense(self):
+        if self.def_counter > -3:
+            self.defense -=4
+            print(f"{self.name}'s defense has been lowered!")
+            self.def_counter -= 1
+            print(f"{self.name}'s Def count: {self.def_counter}")
+        else:
+            print(f"{self.name}'s defense won't go any lower!")
+    def lower_speed(self):
+        if self.spd_counter > -3:
+            self.speed -= 4
+            print(f"{self.name}'s speed has been lowered!")
+            self.spd_counter -= 1
+        else:
+            print(f"{self.name}'s speed won't go any lower!")
+
+    def reset_stats(self):
+        self.health = self.maxhp
+        self.attack = self.real_attack
+        self.defense = self.real_defense
+        self.speed = self.real_speed
+
+    def fight(self, ch2):
+        #print fight information
+        battle_win = False
+        print(f"\n{self.name} Level {self.level} vs {ch2.name} Level {ch2.level}!")
+        print("\nYour health: " + str(self.health) + "\n" + str(ch2.name) + "'s health: " + str(ch2.health))
+        while self.health > 0 and ch2.health > 0:
+
+            def player_turn():
+                print("\nWhich move will you use?")
+                print("------------------------")
+                for i, x in enumerate(self.moves):
+                    print(str(i+1) + ".", str(x.name))
+                index = int(input("Pick a move: "))
+                chosen_move = self.moves[index-1]
+                print(f"{self.name} used {chosen_move.name}!")
+                
+                #Heal if healing move is chosen
+                if chosen_move in heal_moves:
+                    self.heal(chosen_move.power)
+                elif chosen_move.power < 1:
+                    pass
+                else:
+                #Determine damage
+                    damage = round((chosen_move.power * self.attack) / (chosen_move.power + ch2.defense))
+                    ch2.health -= damage
+                    print(f"\n{ch2.name} took {damage} damage!")
+
+                #Buff or Nerf if applicable
+                if chosen_move in buffAtk:
+                    self.raise_attack()
+                if chosen_move in buffDef:
+                    self.raise_defense()
+                if chosen_move in buffSpd:
+                    self.raise_speed()
+                if chosen_move in nerfAtk:
+                    self.lower_attack()
+                if chosen_move in nerfDef:
+                    self.lower_defense()
+                if chosen_move in nerfSpd:
+                    self.lower_speed()
+
+                if chosen_move in buffOppAtk:
+                    ch2.raise_attack()
+                if chosen_move in buffOppDef:
+                    ch2.raise_defense()
+                if chosen_move in buffOppSpd:
+                    ch2.raise_speed()
+                if chosen_move in nerfOppAtk:
+                    ch2.lower_attack()
+                if chosen_move in nerfOppDef:
+                    ch2.lower_defense()
+                if chosen_move in nerfOppSpd:
+                    ch2.lower_speed()
+
+                print("\nYour health: " + str(self.health) + "\n" + str(ch2.name) + "'s health: " + str(ch2.health))
+
+                #Check to see if opponent fainted
+                if ch2.health <= 0:
+                    print(f"{ch2.name} had fainted!")
+                    print("You won!")
+                    print(f"You gained {ch2.xp_value} exp!")
+                    self.add_xp(ch2.xp_value)
+                    self.add_moves()
+                    battle_win = True
+                    #break
+
+            #Opponent's turn
+            def opponent_turn():
+                global low_def_counter
+                ch2_poss_moves = len(ch2.moves)
+                if ch2_poss_moves > 1:
+                    move_choice = random.randint(1, ch2_poss_moves)
+                else:
+                    move_choice = 1
+                chosen_move2 = ch2.moves[move_choice -1]
+                print(f"\n{ch2.name} used {chosen_move2.name}!")
+
+                #Heal if healing move is used
+                if chosen_move2 in heal_moves:
+                    ch2.heal(chosen_move2.power)
+                elif chosen_move2.power < 1:
+                    pass
+                else:
+                #Determine damage
+                    damage = round((chosen_move2.power * ch2.attack) / (chosen_move2.power + self.defense))
+                    self.health -= damage
+                    print(f"\n{self.name} took {damage} damage!")
+
+                #Buff or Nerf if applicable
+                if chosen_move2 in buffAtk:
+                    ch2.raise_attack()
+                if chosen_move2 in buffDef:
+                    ch2.raise_defense()
+                if chosen_move2 in buffSpd:
+                    ch2.raise_speed()
+                if chosen_move2 in nerfAtk:
+                    ch2.lower_attack()
+                if chosen_move2 in nerfDef:
+                    ch2.lower_defense()
+                if chosen_move2 in nerfSpd:
+                    ch2.lower_speed()
+
+                if chosen_move2 in buffOppAtk:
+                    self.raise_attack()
+                if chosen_move2 in buffOppDef:
+                    self.raise_defense()
+                if chosen_move2 in buffOppSpd:
+                    self.raise_speed()
+                if chosen_move2 in nerfOppAtk:
+                    self.lower_attack()
+                if chosen_move2 in nerfOppDef:
+                    self.lower_defense()
+                if chosen_move2 in nerfOppSpd:
+                    self.lower_speed()
+
+                print("\nYour health: " + str(self.health) + "\n" + str(ch2.name) + "'s health: " + str(ch2.health))
+
+                #Check to see if player fainted
+                if self.health <= 0:
+                    print(f"{self.name} had fainted!")
+                    print("You lost!")
+                    battle_win = False
+                    #break
+
+            if self.speed >= ch2.speed:
+                player_turn()
+                if self.health > 0 and ch2.health > 0:
+                    opponent_turn()
+            else:
+                opponent_turn()
+                if self.health > 0 and ch2.health > 0:
+                    player_turn()
+
+        self.reset_stats()
+        ch2.reset_stats()
+        #print(f"{self.health} {self.defense}")
+        #print(f"{ch2.health}")
+
+if __name__ == '__main__':
+
+    Punch = fighter_moves("Punch", 20) 
+    Slap = fighter_moves("Slap", 10) 
+    Kick = fighter_moves("Kick", 30) #lowers defense
+    Leer = fighter_moves("Leer", 0) #lowers opponent defense
+    Glare = fighter_moves("Glare", 0) #lowers opponent attack
+    Rest = fighter_moves("Rest", 15) #heals user
+    Guard = fighter_moves("Guard", 0) # raises defense
+
+    buffAtk = []
+    buffDef = [Guard]
+    buffSpd = []
+    nerfAtk = []
+    nerfDef = [Kick]
+    nerfSpd = []
+
+    buffOppAtk = []
+    buffOppDef = []
+    buffOppSpd = []
+    nerfOppAtk = [Glare]
+    nerfOppDef = [Leer]
+    nerfOppSpd = []
+
+    heal_moves = [Rest]
+
+    basic_badguy = fighter("Basic Badguy", 1, 20, 10, 9, 10, [Slap], 0)
+
+    basic_hero = fighter("Basic Hero", 1, 20, 9, 10, 11, [Punch], 0)
+
+    #basic_badguyLv5 = fighter("Basic Badguy", 5, 28, 20, 22, 23, [Punch, Slap, Leer])
+
+    #basic_heroLv5 = fighter("Basic Hero", 5, 26, 23, 20, 22, [Punch, Kick, Rest, Guard])
+
+    #basic_badguyLv3 = fighter("Basic Badguy", 3, 25, 20, 18, 15, [Punch, Slap])
+
+    #basic_heroLv3 = fighter("Basic Hero", 3, 26, 20, 20, 18, [Punch, Kick])
+
+    basic_hero.add_moves()
+    basic_badguy.add_moves()
+
+    basic_hero.fight(basic_badguy)
+    
+    basic_hero.fight(basic_badguy)
+    basic_hero.fight(basic_badguy)
+    basic_hero.fight(basic_badguy)
+
+    '''basic_badguy.fight(basic_hero)
+    basic_badguy.fight(basic_hero)
+    basic_badguy.fight(basic_hero)
+    basic_badguy.fight(basic_hero)'''
+
+    '''if battle_win == True:
+        basic_hero.add_moves()
+        basic_hero.fight(basic_badguy)'''
+
+    #basic_heroLv5.fight(basic_badguyLv5)
+    #basic_heroLv3.fight(basic_badguyLv3)
+
+    #basic_badguy.fight(basic_hero)
+    #basic_badguyLv5.fight(basic_heroLv5)
